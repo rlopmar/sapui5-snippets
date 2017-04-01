@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta charset="utf-8">
+
+		<title>MVC with XmlView</title>
+
+		<!-- Load UI5, select "sap_belize" theme and the "sap.m" control library -->
+		<script id='sap-ui-bootstrap'
+			src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+			data-sap-ui-theme='sap_belize'
+			data-sap-ui-libs='sap.m'
+			data-sap-ui-xx-bindingSyntax='complex'></script>
+
+
+		<!-- DEFINE RE-USE COMPONENTS - NORMALLY DONE IN SEPARATE FILES -->
+
+		<!-- define a new (simple) View type as an XmlView
+		 note: typically this would be a standalone file -->
+
+		<script id="view1" type="sapui5/xmlview">
+		<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core" controllerName="my.own.controller">
+			<Panel headerText="Hello World">
+				<ComboBox width="500px"
+					id="CB1"
+					placeholder= "Continent"
+					selectionChange="doSomething"
+					items="{
+						path: '/continents',
+						sorter: { path: 'continentName' }
+					}">
+					<items>
+						<core:Item key="{continentName}" text="{continentName}" />
+					</items>
+				</ComboBox>
+				<ComboBox width="500px"
+					id="CB2"
+					placeholder= "Country"
+					selectionChange="doSomething"
+					items="{
+						path: '/countries',
+						sorter: { path: 'countryName' }
+					}">
+					<items>
+						<core:Item key="{countryName}" text="{countryName}" />
+					</items>
+				</ComboBox>
+				<ComboBox width="500px"
+					id="CB3"
+					placeholder= "City"
+					selectionChange="doSomething"
+					items="{
+						path: '/cities',
+						sorter: { path: 'cityName' }
+					}">
+					<items>
+						<core:Item key="{cityName}" text="{cityName}" />
+					</items>
+				</ComboBox>
+			</Panel>
+		</mvc:View> 
+	</script>
+
+
+		<script>
+			// define a new (simple) Controller type
+			sap.ui.controller("my.own.controller", {
+
+				// implement an event handler in the Controller
+				doSomething: function() {
+					var oCB1 = this.getView().byId("CB1");
+					var oCB2 = this.getView().byId("CB2");
+					var oCB3 = this.getView().byId("CB3");
+					
+					var bindingInput2 = oCB2.getBinding("items");
+					bindingInput2.filter( [ new sap.ui.model.Filter([
+						  new sap.ui.model.Filter("continent", sap.ui.model.FilterOperator.Contains, oCB1.getValue() )
+					   ],true)
+					])
+					
+					var bindingInput3 = oCB3.getBinding("items");
+					bindingInput3.filter( [ new sap.ui.model.Filter({
+						filters: [
+						  new sap.ui.model.Filter("continent", sap.ui.model.FilterOperator.Contains, oCB1.getValue() ),
+						  new sap.ui.model.Filter("country", sap.ui.model.FilterOperator.Contains, oCB2.getValue() )
+						],
+						and: true
+					})])
+				}
+			});
+	
+	
+	
+			/*** THIS IS THE "APPLICATION" CODE ***/
+
+			// create some dummy JSON data
+			var data = {
+				selectedValues:[
+					{selectedContinent: ""},
+					{selectedCountry: ""},
+					{selectedCity: ""}
+				],
+				
+				continents: [
+					{continentName: "Europe"},
+					{continentName: "America"}
+				],
+				
+				countries: [
+					{countryName: "Germany", continent: "Europe"},
+					{countryName: "Spain", continent: "Europe"},
+					{countryName: "Italy", continent: "Europe"},
+					{countryName: "USA", continent: "America"},
+					{countryName: "Canada", continent: "America"}
+				],
+				
+				cities: [
+					{cityName:"Berlin", country: "Germany", continent: "Europe"},
+					{cityName:"Munich", country: "Germany", continent: "Europe"},
+					{cityName:"Madrid", country: "Spain", continent: "Europe"},
+					{cityName:"Barcelona", country: "Spain", continent: "Europe"},
+					{cityName:"Roma", country: "Italy", continent: "Europe"},
+					{cityName:"Milan", country: "Italy", continent: "Europe"},
+					{cityName:"New York", country: "USA", continent: "America"},
+					{cityName:"Chicago", country: "USA", continent: "America"},
+					{cityName:"Vancouver", country: "Canada", continent: "America"},
+					{cityName:"Montreal", country: "Canada", continent: "America"}
+				]
+			};
+
+			// instantiate the View
+			var myView = sap.ui.xmlview({viewContent:jQuery('#view1').html()}); // accessing the HTML inside the script tag above
+
+			// create a Model and assign it to the View
+			var oModel = new sap.ui.model.json.JSONModel();
+			oModel.setData(data);
+			myView.setModel(oModel);
+
+			// put the View onto the screen
+			myView.placeAt('content');
+
+		</script>
+	
+	</head>
+	<body id='content' class='sapUiBody'>
+	</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv='X-UA-Compatible' content='IE=edge' />
+	<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'/>
+
+	<title>Mobile App with XML View with JSON Data</title>
+    
+ <script id='sap-ui-bootstrap' type='text/javascript'
+   src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+   data-sap-ui-theme='sap_bluecrystal'
+   data-sap-ui-libs='sap.m'></script>
+
+ <script id="myxml" type="text/xmldata">
+   <mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="my.own.controller"  xmlns:uni="sap.ui.unified" >
+	  <App>
+		 <Page title="SAPUI5 App">
+			 <List headerText="Products" items="{/Products}" >
+				<CustomListItem>
+					<VBox class="sapUiSmallMarginBegin sapUiSmallMarginTopBottom">
+						<Text text="{Name}"></Text>
+						<uni:Currency value="{Price}" currency="USD" useSymbol="true"></uni:Currency> 
+					</VBox>
+				</CustomListItem>
+			</List>
+		</Page>
+	  </App>
+   </mvc:View>	
+  </script>
+	
+ <script>
+	
+	sap.ui.controller("my.own.controller", {
+		onInit: function() {
+			jQuery.sap.require("sap.ui.app.MockServer");
+
+			sap.ui.app.MockServer.config({
+				autoRespond : true,
+				autoRespondAfter : 1000
+			});
+
+			// create mockserver
+			var oMockServer = new sap.ui.app.MockServer({
+				rootUri : "http://sap.com/service/"
+			});
+
+			// start and return
+			oMockServer.simulate("https://sapui5.hana.ondemand.com/test-resources/sap/m/qunit/data/metadata.xml","https://sapui5.hana.ondemand.com/test-resources/sap/m/qunit/data");
+			oMockServer.start();
+
+			sURL = "http://sap.com/service/";
+			var model = new sap.ui.model.odata.ODataModel(sURL, true);
+			this.getView().setModel(model);
+		}
+	});	
+	sap.ui.view({ viewContent:document.scripts.myxml.innerText, type:sap.ui.core.mvc.ViewType.XML }).placeAt("content")
+ </script>
+
+</head>
+<body class='sapUiBody'>
+   <div id='content'></div>
+</body>
+</html>
+<!-- user:Bogdan --><!-- description:MockServer -->
+<!-- user:Daniel Nanovski --><!-- description:Currency with MockServer and Edm type set  -->

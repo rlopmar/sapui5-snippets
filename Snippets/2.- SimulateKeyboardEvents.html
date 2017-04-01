@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+
+    <title>MVC with XmlView</title>
+
+    <!-- Load UI5, select "blue crystal" theme and the "sap.m" control library -->
+    <script 
+      id="sap-ui-bootstrap"
+      src="https://sapui5.hana.ondemand.com/resources/sap-ui-core.js" 
+      data-sap-ui-theme="sap_bluecrystal" 
+      data-sap-ui-libs="sap.m" 
+      data-sap-ui-xx-bindingsyntax="complex">
+    </script>
+
+
+    <!-- DEFINE RE-USE COMPONENTS - NORMALLY DONE IN SEPARATE FILES -->
+
+    <!-- define a new (simple) View type as an XmlView
+     note: typically this would be a standalone file -->
+
+    <script id="view1" type="sapui5/xmlview">
+    <mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" controllerName="my.own.controller">
+      <Panel headerText="Hello World">
+         <Input id="inp1"/>
+         <Button text="register OnEnter" type="info" press="doRegisterOnEnter" />
+         <Button text="send Enter" type="info" press="doSendEnter" />
+      </Panel>
+    </mvc:View> 
+      </script>
+
+
+    <script>
+      // define a new (simple) Controller type
+      
+      sap.ui.controller("my.own.controller", {
+
+          // implement an event handler in the Controller
+          doSomething: function(oEvent) {
+            alert("The value is: " + oEvent.getSource().getValue());
+          },
+          
+          sendKeyCode: function(controlId, keyCode) {
+              var event;
+              var control;
+
+              control = $("#" + controlId);
+              event = jQuery.Event("keydown", {
+                keyCode: keyCode,
+                which: keyCode
+              });
+            control.trigger(event);
+          },
+           
+          doSendEnter: function() {
+              var ctlInput;
+              var ctlId;
+              ctlInput = this.byId("inp1");
+              ctlId = ctlInput.getId();
+              this.sendKeyCode(ctlId, 13);
+          },
+                
+          doRegisterOnEnter: function() {
+              this.getView().byId("inp1").attachSubmit(this.doSomething);
+          }
+            
+      });
+  
+      /*** THIS IS THE "APPLICATION" CODE ***/
+
+      // create some dummy JSON data
+      var data = {
+        actionName: "Say Hello"
+      };
+
+      // instantiate the View
+      var myView = sap.ui.xmlview({viewContent:jQuery('#view1').html()}); // accessing the HTML inside the script tag above
+
+      // create a Model and assign it to the View
+      var oModel = new sap.ui.model.json.JSONModel();
+      oModel.setData(data);
+      myView.setModel(oModel);
+
+      // put the View onto the screen
+      myView.placeAt('content');
+
+    </script>
+  </head>
+  <body id="content" class="sapUiBody"></html>
