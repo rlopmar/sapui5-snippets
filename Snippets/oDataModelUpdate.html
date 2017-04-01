@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta charset="utf-8">
+
+		<title>MVC with XmlView</title>
+
+		<!-- Load UI5, select "blue crystal" theme and the "sap.m" control library -->
+		<script id='sap-ui-bootstrap'
+			src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+			data-sap-ui-theme='sap_bluecrystal'
+			data-sap-ui-libs='sap.m'
+			data-sap-ui-xx-bindingSyntax='complex'></script>
+
+
+		<!-- DEFINE RE-USE COMPONENTS - NORMALLY DONE IN SEPARATE FILES -->
+
+		<!-- define a new (simple) View type as an XmlView
+		 - using data binding for the Button text
+		 - binding a controller method to the Button's "press" event
+		 - also mixing in some plain HTML
+		 note: typically this would be a standalone file -->
+
+		<script id="view1" type="sapui5/xmlview">
+		<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" controllerName="my.own.controller">
+			<Panel>
+				<Button text="Apply Filters" press="onApplyFiltersButton"/>
+				<Button text="Update" press="onUpdateButton"/>
+				<Text text="Update button will change the rating of the first element on the list to 2. \nFilters will retrieve elements with rating 3 and an 'a' in the name. Then order them by name"/>
+			</Panel>
+			<Panel height="1000px" headerText="List">
+				<List id="list1" items="{/Products}">
+					<ObjectListItem title="{Name}" number="{ID}">
+						<attributes>
+							<ObjectAttribute text="Rating: {Rating}" />
+						</attributes>
+					</ObjectListItem>
+				</List>
+			</Panel>
+		</mvc:View> 
+        </script>
+
+
+		<script>
+			// define a new (simple) Controller type
+			sap.ui.controller("my.own.controller", {
+
+				// ApplyFilters Button press event handler
+				// Apply 2 filters. Rating = 3 && Name-contains-a
+				onApplyFiltersButton: function() {
+					
+					var oList1 =  this.getView().byId("list1");
+                    var _filters= [new sap.ui.model.Filter("Rating", "EQ", "3"), new sap.ui.model.Filter("Name", "Contains", "a")];
+                    oList1.bindAggregation("items", {
+                      path: "/Products",
+					  filters: _filters,
+					  sorter: new sap.ui.model.Sorter("Name", true, false),
+					  template: new sap.m.ObjectListItem({
+						  type: "{= ${device>/system/phone} ? 'Active' : 'Inactive'}",
+						  press: "onSelectionChange",
+						  title: "{Name}",
+						  number: "{ID}",
+						  attributes: new sap.m.ObjectAttribute({text: "Rating: {Rating}"})
+					  })
+					});
+				},
+
+				// Update against the model. Get the first item og the list and update its 'Rating' property to 2
+				// Note that if you change all the entries with rating 3 to rating 2, then the filters will retrieve no data, because there will be not entries with rating 3				
+				onUpdateButton: function(){
+					var oItemToUpdate = this.getView().byId("list1").getBinding("items").aKeys[0];
+					var data = {Rating: "2"};
+					oModel.update("/"+oItemToUpdate,data, {success: function() {console.log("success")}, error:function() {console.log("error")}});
+				}
+			});
+			
+			
+			// instantiate the View
+			var myView = sap.ui.xmlview({viewContent:jQuery('#view1').html()}); // accessing the HTML inside the script tag above
+			
+			var url = "https://cors-anywhere.herokuapp.com/services.odata.org/V2/(S(gywkachanqldeegc0pb1zgdp))/OData/OData.svc";
+		
+			// create an ODataModel from URL
+			var oModel = new sap.ui.model.odata.v2.ODataModel(url, {
+				useBatch : false,
+				defaultBindingMode : "TwoWay"
+			});
+			myView.setModel(oModel);
+    	   	
+
+			// put the View onto the screen
+			myView.placeAt('content');
+
+		</script>
+	
+	</head>
+	<body id='content' class='sapUiBody'>
+	</body>
+</html>

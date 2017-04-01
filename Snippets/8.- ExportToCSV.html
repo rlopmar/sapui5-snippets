@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv='X-UA-Compatible' content='IE=edge' />
+	<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'/>
+	
+	<title>Export to CSV file from JSON model</title>
+	
+	<script id='sap-ui-bootstrap' type='text/javascript'
+			src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+		data-sap-ui-theme='sap_bluecrystal'
+		data-sap-ui-libs='sap.ui.commons,sap.ui.table'></script>
+	
+	<script>
+		
+		var data = [{
+			"Id": "id1",
+			"Name": "name1",
+			"Year": "2016"
+		},{
+			"Id": "id2",
+			"Name": "name2",
+			"Year": "2016"
+		},{
+			"Id": "id3",
+			"Name": "name3",
+			"Year": "2016"
+		},{
+			"Id": "id4",
+			"Name": "name4",
+			"Year": "2016"
+		},{
+			"Id": "id5",
+			"Name": "name5",
+			"Year": "2016"
+		},{
+			"Id": "id6",
+			"Name": "name6",
+			"Year": "2016"
+		},];
+		var oModel = new sap.ui.model.json.JSONModel(data);
+		
+		// Create table, just to visualize the data, before export
+		var oTable = new sap.ui.table.Table();
+		jQuery.each(["Id", "Name", "Year"], function(iIndex, sValue) {
+			console.log(sValue);
+			oTable.addColumn(new sap.ui.table.Column({
+				label: sValue, 
+				template: sValue, 
+				filterProperty: sValue, 
+				sortProperty: sValue
+			}));
+		});
+		// set model to Table
+		oTable.setModel(oModel);
+		oTable.bindRows("/");
+		
+		var oButton = new sap.ui.commons.Button({
+			text: "Export to Excel",
+			press: function() {
+				jQuery.sap.require("sap.ui.core.util.Export");
+				jQuery.sap.require("sap.ui.core.util.ExportTypeCSV");
+				
+				// Create the export object
+				var oExport = new sap.ui.core.util.Export({
+					// Specify the Export Type parameter
+					exportType: new sap.ui.core.util.ExportTypeCSV({
+						separatorChar: ";"
+					}),
+					// Pass in the model created above
+					models: oModel,
+					// binding information for the rows aggregation
+					rows: {
+						path: "/"
+					},
+					// column definitions with column name and binding info for the content
+					columns: 
+					[{
+						name: "Id_Custom_Label",
+						template: {
+							content: {
+								path: "Id"
+							}
+						}
+					}, {
+						name: "Name_Custom_Label",
+						template: {
+							content: {
+								path: "Name"
+							}
+						}
+					}, {
+						name: "Year_Custom_Label",
+						template: {
+							content: {
+								path: "Year"
+							}
+						}
+					}, {
+						name: "Calculated_Field",
+						template: {
+							content: {
+								parts:[{path: "Id"}, {path: "Year"}],
+                                formatter: function(id, year) {
+                                  return id + " (" + year + ")";
+                                }
+							}
+						}
+					}]
+				});
+				
+				// Save the file
+				var savedFile = oExport.saveFile("testFile with 1.38 version");
+				// destroy the export object if it isn't needed anymore to cleanup everything
+				savedFile.always(function() {
+					this.destroy();
+				});
+			}
+		});
+		oButton.placeAt("content");
+		oTable.placeAt("content");
+		
+	</script>
+	
+	</head>
+	<body class='sapUiBody'>
+		<div id='content'></div>
+	</body>
+</html>
