@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta charset="utf-8">
+
+		<title>MVC with XmlView</title>
+
+		<!-- Load UI5, select "blue crystal" theme and the "sap.m" control library -->
+		<script id='sap-ui-bootstrap'
+			src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+			data-sap-ui-theme='sap_bluecrystal'
+			data-sap-ui-libs='sap.m'
+			data-sap-ui-xx-bindingSyntax='complex'></script>
+
+
+		<!-- DEFINE RE-USE COMPONENTS - NORMALLY DONE IN SEPARATE FILES -->
+
+		<!-- define a new (simple) View type as an XmlView
+		 - using data binding for the Button text
+		 - binding a controller method to the Button's "press" event
+		 - also mixing in some plain HTML
+		 note: typically this would be a standalone file -->
+
+		<script id="view1" type="sapui5/xmlview">
+		<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" controllerName="my.own.controller">
+			<Panel headerText="Hello World">
+				<Button text="{jsonModel>/buttonText}" press="onExportData"></Button>
+			</Panel>
+			<Panel>
+				<List items="{/Orders}">
+					<StandardListItem title="{ShipName}"/>
+				</List>
+			</Panel>
+		</mvc:View> 
+        </script>
+
+
+		<script>
+			// define a new (simple) Controller type
+			sap.ui.controller("my.own.controller", {
+
+				onExportData: function(oEvent){
+					var sUrl = this.getView().getModel().sServiceUrl + "/Orders?$format=json";
+					sUrl = "http://"+sUrl.split("cors-anywhere.herokuapp.com/")[1]
+			        var encodeUrl = encodeURI(sUrl);
+				 	sap.m.URLHelper.redirect(encodeUrl, true);
+				}
+			});
+	
+	
+	
+			/*** THIS IS THE "APPLICATION" CODE ***/
+
+			// create some dummy JSON data
+			var data = {
+				buttonText: "Export in JSON format"
+			};
+
+			var oJSONModel = new sap.ui.model.json.JSONModel();
+			oJSONModel.setData(data);
+
+
+			// create a Model and assign it to the View
+			var uri = "https://cors-anywhere.herokuapp.com/services.odata.org/Northwind/Northwind.svc"; // local proxy for cross-domain access
+			var oNorthwindModel = new sap.ui.model.odata.ODataModel(uri, {
+				maxDataServiceVersion: "2.0"
+			}); 
+
+			// instantiate the View
+			var myView = sap.ui.xmlview({viewContent:jQuery('#view1').html()}); // accessing the HTML inside the script tag above
+			myView.setModel(oNorthwindModel);
+			myView.setModel(oJSONModel, "jsonModel");
+
+			// put the View onto the screen
+			myView.placeAt('content');
+
+		</script>
+	
+	</head>
+	<body id='content' class='sapUiBody'>
+	</body>
+</html>
