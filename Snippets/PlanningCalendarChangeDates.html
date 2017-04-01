@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta charset="utf-8">
+
+		<title>MVC with XmlView</title>
+
+		<!-- Load UI5, select "blue crystal" theme and the "sap.m" control library -->
+		<script id='sap-ui-bootstrap'
+			src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+			data-sap-ui-theme='sap_bluecrystal'
+			data-sap-ui-libs='sap.m'
+			data-sap-ui-xx-bindingSyntax='complex'></script>
+
+
+		<!-- DEFINE RE-USE COMPONENTS - NORMALLY DONE IN SEPARATE FILES -->
+
+		<!-- define a new (simple) View type as an XmlView
+		 - using data binding for the Button text
+		 - binding a controller method to the Button's "press" event
+		 - also mixing in some plain HTML
+		 note: typically this would be a standalone file -->
+
+		<script id="view1" type="sapui5/xmlview">
+		<mvc:View
+			controllerName="my.own.controller"
+			xmlns:mvc="sap.ui.core.mvc"
+			xmlns:unified="sap.ui.unified"
+			xmlns="sap.m">
+			<VBox class="sapUiSmallMargin">
+				<PlanningCalendar
+					id="PC1"
+					showRowHeaders="false"
+					startDate="{path: '/startDate'}"
+					viewKey="Day"
+					rows="{path: '/people'}"
+					appointmentSelect="handleAppointmentSelect"
+					intervalSelect="handleIntervalSelect">
+					<toolbarContent>
+						<Title text="Title" titleStyle="H4"/>
+					</toolbarContent>
+					<rows>
+						<PlanningCalendarRow
+							appointments="{appointments}"
+							intervalHeaders="{headers}">
+							<appointments>
+								<unified:CalendarAppointment
+									startDate="{start}"
+									endDate="{end}"
+									icon="{pic}"
+									title="{title}"
+									text="{info}"
+									type="{type}"
+									tentative="{tentative}">
+								</unified:CalendarAppointment>
+							</appointments>
+							<intervalHeaders>
+								<unified:CalendarAppointment
+									startDate="{start}"
+									endDate="{end}"
+									icon="{pic}"
+									title="{title}"
+									type="{type}">
+								</unified:CalendarAppointment>
+							</intervalHeaders>
+						</PlanningCalendarRow>
+					</rows>
+				</PlanningCalendar>
+			</VBox>
+			<VBox class="sapUiSmallMargin">
+				<Button text="Change Dates" press="onChangeDates"/>
+				<Text text="Press this button to change the dates of some calendar entries"/>
+			</VBox>
+		</mvc:View> 
+	</script>
+
+
+		<script>
+			// define a new (simple) Controller type
+			sap.ui.controller("my.own.controller", {
+				
+				onInit: function () {
+					// create model
+					var oModel = new sap.ui.model.json.JSONModel();
+					oModel.setData({
+						startDate: new Date("2016", "01", "08", "8", "0"),
+						people: [{
+											name: "Max Mustermann",
+											appointments: [
+														   {
+															 start: new Date("2016", "01", "08", "10", "0"),
+															 end: new Date("2016", "01", "08", "12", "0"),
+															 title: "Team meeting",
+															 info: "room 1",
+															 type: "Type01",
+															 pic: "sap-icon://sap-ui5",
+															 tentative: false
+														   },
+														   {
+															 start: new Date("2016", "01", "09", "0", "0"),
+															 end: new Date("2016", "01", "09", "23", "59"),
+															 title: "Vacation",
+															 info: "out of office",
+															 type: "Type02",
+															 tentative: false
+														   },
+														   {
+															 start: new Date("2016", "01", "11", "0", "0"),
+															 end: new Date("2016", "01", "12", "23", "59"),
+															 title: "Education",
+															 info: "",
+															 type: "Type03",
+															 tentative: false
+														   }
+														   ],
+											headers: [
+													  {
+														start: new Date("2016", "01", "08", "0", "0"),
+														end: new Date("2016", "01", "08", "23", "59"),
+														title: "Rosenmontag",
+														type: "Type04"
+													  },
+													  {
+														start: new Date("2016", "01", "10", "0", "0"),
+														end: new Date("2016", "01", "10", "23", "59"),
+														title: "Aschermittwoch",
+														type: "Type04"
+													  }
+												  ]
+										}
+						]
+					});
+					this.getView().setModel(oModel);
+		
+				},
+		
+				handleAppointmentSelect: function (oEvent) {
+					var oAppointment = oEvent.getParameter("appointment");
+					if (oAppointment) {
+						alert("Appointment selected: " + oAppointment.getTitle());
+					}else {
+						var aAppointments = oEvent.getParameter("appointments");
+						var sValue = aAppointments.length + " Appointments selected";
+						alert(sValue);
+					}
+				},
+		
+				handleIntervalSelect: function (oEvent) {
+					var oPC = oEvent.oSource;
+					var oStartDate = oEvent.getParameter("startDate");
+					var oEndDate = oEvent.getParameter("endDate");
+					var oModel = this.getView().getModel();
+					var oData = oModel.getData();
+					var oAppointment = {start: oStartDate,
+											end: oEndDate,
+											title: "new appointment",
+											type: "Type09"};
+		
+					oData.people[0].appointments.push(oAppointment);
+					oModel.setData(oData);
+				},				
+				
+				
+				// implement an event handler in the Controller
+				onChangeDates: function() {
+					var oCalendar = this.getView().byId("PC1");
+					var aCalRows = oCalendar.getRows();
+					var aAppointments = aCalRows[0].getAppointments();
+					
+					aAppointments[1].setStartDate(new Date("2016", "08", "6", "0", "0"));
+					aAppointments[1].setEndDate(new Date("2016", "08", "18", "23", "59"));
+					aAppointments[2].setStartDate(new Date("2016", "08", "18", "0", "0"));
+					aAppointments[2].setEndDate(new Date("2016", "08", "23", "23", "59"));
+					
+				}
+				
+				
+			});
+	
+	
+	
+			/*** THIS IS THE "APPLICATION" CODE ***/
+			
+			// instantiate the View
+			var myView = sap.ui.xmlview({viewContent:jQuery('#view1').html()}); // accessing the HTML inside the script tag above
+
+
+			// put the View onto the screen
+			myView.placeAt('content');
+
+		</script>
+	
+	</head>
+	<body id='content' class='sapUiBody'>
+	</body>
+</html>

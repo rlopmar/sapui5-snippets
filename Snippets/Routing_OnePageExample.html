@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv='X-UA-Compatible' content='IE=edge' >
+	<meta charset="UTF-8" >
+	<title>test</title>
+
+	<script id='sap-ui-bootstrap'
+			src='https://sapui5.hana.ondemand.com/1.38.5/resources/sap-ui-core.js'
+		data-sap-ui-theme='sap_bluecrystal'
+		data-sap-ui-bindingSyntax="complex"></script>
+
+	<script id="view1" type="sapui5/xmlview">
+		<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc">
+			<core:ComponentContainer name='my.comp'/>
+		</mvc:View>
+	</script>
+
+	<script id="view2" type="sapui5/xmlview">
+		<mvc:View xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc"
+			controllerName="my.controller">
+			<Page id="page">
+				<Button text="to object" press=".onButton1Press"/>
+			</Page>
+		</mvc:View>
+	</script>
+
+	<script id="view3" type="sapui5/xmlview">
+		<mvc:View xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc"
+			controllerName="my.controller">
+			<Page id="page">
+				<Button text="to detail" press=".onButton2Press"/>
+				<Button text="to home" press=".onButton3Press"/>
+			</Page>
+		</mvc:View>
+	</script>
+
+	<script id="view4" type="sapui5/xmlview">
+		<mvc:View xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc"
+			controllerName="my.controller">
+			<Page id="page">
+				<Button text="to object" press=".onButton1Press"/>
+				<Button text="to home" press=".onButton3Press"/>
+			</Page>
+		</mvc:View>
+	</script>
+
+	<script>
+		// jQuery.sap.declare("my.comp.Component");
+		sap.ui.define("my/comp/Component", ["sap/ui/core/UIComponent"], function(UIComponent) {
+			return UIComponent.extend("my.comp.Component", {
+				metadata : {
+					name : "GreatComponent",
+					version : "1.0",
+					includes : [],
+					dependencies : {
+						libs : ["sap.m"]
+					},
+					routing: {
+						config: {
+							routerClass: "sap.m.routing.Router",
+							viewType: "XML",
+							viewPath: "my",
+							controlId: "app",
+							transition: "slide",
+							controlAggregation: "pages"
+						},
+						routes: [
+							{
+								name: "home",
+								pattern: "",
+								target: "home"
+							},
+							{
+								name: "object",
+								pattern: "object",
+								target: "object"
+							},
+							{
+								name: "detail",
+								pattern: "detail",
+								target: "detail"
+							}
+						],
+						targets: {
+							home: {
+								viewName: "View2",
+								title: "home"
+							},
+							object: {
+								viewName: "View3",
+								title: "object"
+							},
+							detail: {
+								viewName: "View4",
+								title: "detail"
+							}
+						}
+					}
+				},
+
+				init: function() {
+					sap.ui.core.UIComponent.prototype.init.apply(this, arguments);
+
+					var oRouter = this.getRouter();
+
+					var oViews = oRouter.getViews();
+
+					this.runAsOwner(function() {
+						var myView2 = sap.ui.xmlview({viewContent:jQuery('#view2').html()});
+						oViews.setView("my.View2", myView2);
+						var myView3 = sap.ui.xmlview({viewContent:jQuery('#view3').html()});
+						oViews.setView("my.View3", myView3);
+						var myView4 = sap.ui.xmlview({viewContent:jQuery('#view4').html()});
+						oViews.setView("my.View4", myView4);
+					});
+
+					oRouter.initialize();
+				},
+				createContent : function() {
+					var componentData = this.getComponentData();
+
+					return new sap.m.App("app", {
+					});
+				}
+			});
+		});
+
+		sap.ui.define("my/controller", ["sap/ui/core/UIComponent", "sap/m/Bar", "sap/m/Select", "sap/ui/core/Item"],
+			function(UIComponent, Bar, Select, Item) {
+			return sap.ui.controller("my.controller", {
+				onInit: function() {
+
+					this.oRouter = UIComponent.getRouterFor(this.getView());
+				},
+
+				onButton1Press: function() {
+					this.oRouter.navTo("object");
+				},
+
+				onButton2Press: function() {
+					this.oRouter.navTo("detail");
+
+				},
+
+				onButton3Press: function() {
+					this.oRouter.navTo("home");
+				},
+			});
+		});
+
+
+		sap.ui.require(["my/comp/Component"], function(myComp) {
+			// instantiate the View
+			sap.ui.xmlview({viewContent:jQuery('#view1').html()}).placeAt('content');
+		});
+	</script>
+
+</head>
+<body class='sapUiBody'>
+	<div id='content'></div>
+</body>
+</html>
