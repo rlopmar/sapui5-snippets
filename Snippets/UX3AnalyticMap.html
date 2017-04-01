@@ -1,0 +1,95 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'/>
+		
+		<title>Map into Shell</title>
+		
+		<script src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+			id="sap-ui-bootstrap"
+			data-sap-ui-libs="sap.m, sap.ui.vbm, sap.viz" 
+			data-sap-ui-theme="sap_bluecrystal"></script>
+			<!-- only load the mobile lib "sap.m" and the Blue Crystal theme -->
+		
+		
+		<script type="text/javascript">
+			
+			//VBI
+			jQuery.sap.require("sap.ui.vbm.VBI");
+			jQuery.sap.require("sap.ui.vbm.AnalyticMap");
+			jQuery.sap.require("sap.ui.layout.HorizontalLayout");
+			jQuery.sap.require("sap.ui.ux3.Shell");
+			
+			var oSelectionModel = new sap.ui.model.json.JSONModel({
+			
+				data : [{
+					id : "latam",
+					name : "Latin America"
+				}, 
+				{
+					id : "europe",
+					name : "Europe"
+			
+				},{
+					id : "all",
+					name : "The world"
+			
+				}]
+			
+			});
+			var DTMODELS = {
+				latam: { keycountries:  ["BO", "CO", "EC", "PE", "BR", "CR", "SV", "GT", "HN", "NI", "PA", "CC", "DM", "DO", "JM", "PR", "TT", "MX", "AR", "CL", "PY", "UY", "VE"]} ,
+				europe:  {keycountries: ["FR", "DE", "GB", "ES", "PT", "BE", "IT", "CZ", "PL"]},
+				all: {keycountries: []}
+			};
+			
+			sap.ui.vbm.AnalyticMap.GeoJSONURL = "media/analyticmap/continent.json";
+					
+			var oMap = new sap.ui.vbm.AnalyticMap("mymap", {
+				width: "100%",
+				height: "600px"
+			});
+			
+			var fnSetDatatoMap = function(oEvent){
+				
+				var aKey = DTMODELS["latam"].keycountries;
+				var sKeyColor = "#D866D8";
+				var oRGB = d3.rgb(sKeyColor);
+
+				//debugger;				
+				
+				oMap.removeAllRegions();
+				
+				for (var i = 0, len = aKey.length; i < len; i++){
+					// rgb colors needed for addRegion
+					sKeyColor = "rgba("+oRGB.r +"," + oRGB.g + "," + oRGB.b + ",1)";
+					oMap.addRegion(new sap.ui.vbm.Region({color: sKeyColor, code: aKey[i]}))
+					oRGB = oRGB.darker([0.1]);
+				}
+				
+				if (aKey.length > 0 ){
+					oMap.zoomToRegions(aKey);
+				}
+			
+			
+			};	
+			
+			var shell = new sap.ui.ux3.Shell({
+				appTitle:'Map into Shell',
+				paneBarItems:new sap.ui.core.Item({text:"Open Here"})
+			});		
+			
+			shell.addContent(oMap);
+
+			fnSetDatatoMap();
+			
+			shell.placeAt('content');
+			
+		</script>
+		
+	</head>
+	<body class="sapUiBody">
+		<div id="content"></div>
+	</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta charset="utf-8">
+
+		<title>MVC with XmlView</title>
+
+		<!-- Load UI5, select "sap_belize" theme and the "sap.m" control library -->
+		<script id='sap-ui-bootstrap'
+			src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+			data-sap-ui-theme='sap_belize'
+			data-sap-ui-libs='sap.m'
+			data-sap-ui-xx-bindingSyntax='complex'></script>
+
+
+		<!-- DEFINE RE-USE COMPONENTS - NORMALLY DONE IN SEPARATE FILES -->
+
+		<!-- define a new (simple) View type as an XmlView
+		 note: typically this would be a standalone file -->
+		<script id="view1" type="sapui5/xmlview">
+		<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" controllerName="my.own.controller" xmlns:core="sap.ui.core">
+			<App>
+				<NavContainer id="navCon">
+					<Page id="p1" title="This page simulates the FLP">
+						<GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Group 1"
+							subheader="Launchpad Tile" press="handleNav">
+						</GenericTile>
+					</Page>
+					<Page id="p2" title="Tiles " showNavButton="true" navButtonPress="handleNavBack">
+						<GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Application 1 in Group 1"
+							subheader="This is simulating a Launchpad Tile" press="press">
+						</GenericTile>
+						<GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Application 2 in Group 1"
+							subheader="This Points to an App" press="press">
+						</GenericTile>
+					</Page>
+				</NavContainer>
+			</App>
+		</mvc:View> 
+		</script>
+
+
+		<script>
+			// define a new (simple) Controller type
+			sap.ui.controller("my.own.controller", {
+
+				handleNav: function(evt) {
+					var navCon = this.getView().byId("navCon");
+					navCon.to(this.getView().byId("p2"));
+				},
+				
+				handleNavBack: function(){
+					var navCon = this.getView().byId("navCon");
+					navCon.back();
+				}
+			});
+	
+	
+	
+			/*** THIS IS THE "APPLICATION" CODE ***/
+
+			// instantiate the View
+			var myView = sap.ui.xmlview({viewContent:jQuery('#view1').html()}); // accessing the HTML inside the script tag above
+
+			// put the View onto the screen
+			myView.placeAt('content');
+
+		</script>
+	
+	</head>
+	<body id='content' class='sapUiBody'>
+	</body>
+</html>

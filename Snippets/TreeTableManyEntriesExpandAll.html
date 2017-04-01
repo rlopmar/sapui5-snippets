@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+    <meta http-equiv='Content-Type' content='text/html;charset=UTF-8' />
+
+    <title>Tree table expand FormatterText</title>
+	
+ <script id='sap-ui-bootstrap' type='text/javascript'
+   src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+   data-sap-ui-theme='sap_bluecrystal'
+   data-sap-ui-libs='sap.m,sap.ui.table'
+   data-sap-ui-xx-bindingSyntax='complex'></script>
+
+	
+    <script id="myXml" type="text/xmldata">
+        <mvc:View xmlns:core="sap.ui.core" 
+					xmlns:mvc="sap.ui.core.mvc" 
+					xmlns="sap.m" 
+					xmlns:table="sap.ui.table" 
+					xmlns:layout="sap.ui.layout"
+					controllerName="treeTableController" 
+					displayBlock="true">
+            <App>
+                <Page title="Tree Table">
+                 <HBox>
+				<Button text="Expand All" press="onExpandAll" class="sapUiSmallMarginEnd"/>
+				<Button text="Collapse All" press="onCollapseAll" class="sapUiSmallMarginEnd"/>
+				<Button text="Show Data" press="onInfoButton" class="sapUiSmallMarginEnd"/>
+				<Button text="Show selectedRow Data" press="onSelectedRowButton" class="sapUiSmallMarginEnd"/>
+				</HBox>
+                    <table:TreeTable id="treeTable" rows="{hierarchies>/location}" visibleRowCountMode="Auto" selectionMode="Single" selectionBehavior="Row" expandFirstLevel="true">
+				<table:columns >
+					<table:Column width="200px">
+						<table:label>
+							<Label text="Name"/>
+						</table:label>					
+						<table:template>
+						<layout:HorizontalLayout>
+						<layout:content>					
+							<FormattedText class="sapUiTinyMarginTop" htmlText="{hierarchies>name}">
+							</FormattedText>	
+						</layout:content>
+						</layout:HorizontalLayout>						
+						</table:template>
+						
+					</table:Column>
+					<table:Column>
+						<table:label>
+							<Label text="Planned Start"/>
+						</table:label>
+						<table:template>
+							<Label text="{hierarchies>plannedStart}"/>
+						</table:template>
+					</table:Column>
+
+					<table:Column>
+						<table:label>
+							<Label text="Planned Finish"/>
+						</table:label>
+						<table:template>
+							<DatePicker placeholder=" " value="{hierarchies>plannedFinish}" valueFormat="yyyyMMddHHmmss" />
+						</table:template>
+					</table:Column>
+					
+					<table:Column >
+						<table:label>
+							<Label text="Remaining Work"/>
+						</table:label>
+						<table:template>
+							<Label text="{hierarchies>remaining}"/>
+						</table:template>
+					</table:Column>
+					
+					<table:Column >
+						<table:label>
+							<Label text="POC"/>
+						</table:label>
+						<table:template>
+							<Label text="{hierarchies>poc}"/>
+						</table:template>
+					</table:Column>
+					
+					<table:Column >
+						<table:label>
+							<Label text="Responsible Person"/>
+						</table:label>
+						<table:template>
+							<Label text="{hierarchies>responsible}"/>
+						</table:template>
+					</table:Column>
+					
+					<table:Column >
+						<table:label>
+							<Label text="Severity"/>
+						</table:label>
+						<table:template>
+							<Label text="{hierarchies>severity}"/>
+						</table:template>
+					</table:Column>
+				</table:columns>
+                    </table:TreeTable>
+                </Page>
+            </App>
+        </mvc:View>
+    </script>
+
+    <script>
+        sap.ui.controller("treeTableController", {
+            onInit: function() {
+				var oData = {
+				location: {
+					children: []
+				}
+			};
+
+			for (var i = 0; i < 10; i++) 
+			{
+				oData.location.children.push({
+					name: "Level0_" + i,
+					factor:Math.floor(Math.random() * 4) + 1, 
+					plannedStart:"06.06.2016",
+					plannedFinish:1470585600000,
+					remaining:100,
+					poc:"50%",
+					responsible:"Chris",
+					severity:"High",
+					children:[]
+				});
+				
+				
+				for(var j=0; j<10; j++)
+				{
+					oData.location.children[i].children.push({
+							name: "Level1_" + i+ "_" + j,
+							factor:Math.floor(Math.random() * 4) + 1, 
+							plannedStart:"07.07.2016",
+							plannedFinish:1470585600000,
+							remaining:100,
+							poc:"50%",
+							responsible:"Snow",
+							severity:"High",
+							children:[]
+					});
+					
+					for(var k=0; k<10; k++)
+					{
+						oData.location.children[i].children[j].children.push({
+							name: "Level2_" + i+ "_" + j + "_" + k,
+							factor:Math.floor(Math.random() * 4) + 1, 
+							plannedStart:"08.08.2016",
+							plannedFinish:1470585600000,
+							remaining:100,
+							poc:"50%",
+							responsible:"Wendy",
+							severity:"High",
+							children:[]
+						});
+						
+						for(var l=0; l<200; l++)
+						{
+							oData.location.children[i].children[j].children[k].children.push({
+								name: "Level3_" + i+ "_" + j + "_" + k + "_" + l,
+								factor:Math.floor(Math.random() * 4) + 1, 
+								plannedStart:"08.08.2016",
+								plannedFinish:1470585600000,
+								remaining:100,
+								poc:"50%",
+								responsible:"Wendy",
+								severity:"High",
+							});
+	
+						}
+
+					}
+						
+						
+				}
+			}
+			var hierarchyModel = new sap.ui.model.json.JSONModel(oData);
+
+            this.getView().setModel(hierarchyModel, 'hierarchies');
+            },
+			
+			onExpandAll: function(evt) {
+				var tree = this.getView().byId('treeTable');
+				tree.expandToLevel(99);
+			},
+			
+			onCollapseAll: function(evt) {
+				var tree = this.getView().byId('treeTable');
+				tree.collapseAll();
+			},
+			
+			/*
+			onAfterRendering: function(){
+				var tree = this.getView().byId('treeTable');
+				tree.expandToLevel(99);
+			},
+			*/
+			
+			onInfoButton: function() {
+				var oModel = this.getView().getModel('hierarchies');
+				alert(oModel.getProperty('/location/children/5/children/6/children/7/name'));
+			},
+          
+            onSelectedRowButton: function(){
+                var oTree = this.getView().byId('treeTable');
+				var oContext = oTree.getContextByIndex(parseInt(oTree.getSelectedIndices()));
+				if(!oContext){
+					alert('Please select and item');
+				}
+				else{
+					var sPath = String(oContext) + "/name";
+					alert(this.getView().getModel('hierarchies').getProperty(sPath));
+				}
+            }
+			
+        });
+        sap.ui.view({
+            viewContent: jQuery('#myXml').html(),
+            type: sap.ui.core.mvc.ViewType.XML
+        }).placeAt("content")
+    </script>
+
+</head>
+
+<body class='sapUiBody sapUiSizeCompact'>
+    <div id='content'></div>
+</body>
+
+</html>
