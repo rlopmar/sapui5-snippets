@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta charset="utf-8">
+
+		<title>MVC with XmlView</title>
+
+		<!-- Load UI5, select "blue crystal" theme and the "sap.m" control library -->
+		<script id='sap-ui-bootstrap'
+			src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+			data-sap-ui-theme='sap_bluecrystal'
+			data-sap-ui-libs='sap.m'
+			data-sap-ui-xx-bindingSyntax='complex'></script>
+      
+		<script id="view1" type="sapui5/xmlview">
+			<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc">
+				<Panel headerText="Hello World">
+					<Button text="Press backspace key in your keyboard" press="doSomething"></Button>
+				</Panel>
+			</mvc:View> 
+		</script>
+		<script>
+			// define a new (simple) Controller type
+			sap.ui.controller("my.own.controller", {
+
+				// implement an event handler in the Controller
+				doSomething: function() {
+					alert("Hello World!");
+				}
+			});
+			// instantiate the View
+			var myView = sap.ui.xmlview({viewContent:jQuery('#view1').html()}); // accessing the HTML inside the script tag above
+
+			// put the View onto the screen
+			myView.placeAt('content');
+		</script>	
+	</head>
+	<body id='content' class='sapUiBody'>
+	</body>
+	<script>
+		document.getElementById('content').addEventListener('keydown', function (event) {
+			if (event.keyCode == 8) {
+				alert('BACKSPACE was pressed');
+		
+				// Call event.preventDefault() to stop the character before the cursor
+				// from being deleted. Remove this line if you don't want to do that.
+				event.preventDefault();
+			}
+		});
+	</script>
+</html>
