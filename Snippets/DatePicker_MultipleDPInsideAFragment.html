@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta charset="utf-8">
+
+		<title>MVC with XmlView</title>
+
+		<!-- Load UI5, select "blue crystal" theme and the "sap.m" control library -->
+		<script id='sap-ui-bootstrap'
+			src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+			data-sap-ui-theme='sap_bluecrystal'
+			data-sap-ui-libs='sap.m'
+			data-sap-ui-xx-bindingSyntax='complex'></script>
+
+
+<script>
+				sap.ui.localResources("testcarrousel");
+				var app = new sap.m.App({});
+				var oPage = sap.m.Page({
+					title : "Click on 1 follow by 2 and 3",
+					content : [
+								new sap.m.Button({
+									text : "1",
+									// function to open dialog and change the data model and rebind the carousel
+									press : function() {
+										sap.ui.getCore().getModel("test").oData = [{},{},{}];
+										sap.ui.getCore().getModel("test").refresh();
+										sap.ui.getCore().byId("Dialog").open();
+									}
+										
+								}), new sap.m.Button({
+									text : "2",
+									// function to open dialog and change the data model and rebind the carousel
+									press : function() {
+										sap.ui.getCore().getModel("test").oData = [{},{}];
+										sap.ui.getCore().getModel("test").refresh();
+										sap.ui.getCore().byId("Dialog").open();
+							 	},
+								}), new sap.m.Button({
+									text : "3",
+									// function to open dialog and change the data model and rebind the carousel
+									press : function() {
+										sap.ui.getCore().getModel("test").oData = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}];
+										sap.ui.getCore().getModel("test").refresh();
+										sap.ui.getCore().byId("Dialog").open();
+									}
+								}),
+									     
+					           ]
+					});
+
+				// model user for the test
+				sap.ui.getCore().setModel(new sap.ui.model.json.JSONModel([ {}, {}, {}, {}, {}, {}, {} ]), "test");
+					
+				// template used in carousel only composed of DatePicker
+					oTemplate = new sap.m.FlexBox({
+
+					items : [
+
+					new sap.m.DatePicker({
+						displayFormat : "dd/MM/yyyy",
+						dateValue : new Date(),
+						width : '100%',
+						valueFormat : "yyyyMMdd",
+						enabled : true
+					}), new sap.m.DatePicker({
+						displayFormat : "dd/MM/yyyy",
+						dateValue : new Date(),
+						width : '100%',
+						valueFormat : "yyyyMMdd",
+						enabled : true
+					}), new sap.m.DatePicker({
+						displayFormat : "dd/MM/yyyy",
+						dateValue : new Date(),
+						width : '100%',
+						valueFormat : "yyyyMMdd",
+						enabled : true
+					}), ]
+
+				})
+						
+				// dialog with carousel
+				var oDialog = new sap.m.Dialog("Dialog",{
+					height : "900px",
+					
+					content : [ new sap.m.Carousel({
+						pages : {	          
+							path : "test>/",
+								  template :  oTemplate,
+						},
+						height: "300px"
+
+					})],
+					
+					buttons : [ new sap.m.Button({
+						text: "close",
+						press: function(){
+							oDialog.close();
+						}
+					})]
+				});
+	
+				var oDummyController = {
+					closeDialog: function(){
+						oFragmentDialog.close();
+					}
+				};
+						
+				
+				app.addPage(oPage);
+				app.placeAt("content");
+		</script>
+	
+	</head>
+	<body id='content' class='sapUiBody'>
+	</body>
+</html>
