@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>SAPUI5</title>
+        <script src="https://sapui5.hana.ondemand.com/resources/sap-ui-core.js"
+            id="sap-ui-bootstrap"
+            data-sap-ui-theme="sap_belize"
+            data-sap-ui-libs="sap.m"
+            data-sap-ui-bindingSyntax="complex"
+            data-sap-ui-compatVersion="edge"
+            data-sap-ui-preload="async"></script>
+            <!-- use "sync" or change the code below if you have issues -->
+ 
+        <!-- XMLView -->
+        <script id="myXmlView" type="ui5/xmlview">
+            <mvc:View
+                controllerName="MyController"
+                xmlns="sap.m"
+                xmlns:core="sap.ui.core"
+                xmlns:mvc="sap.ui.core.mvc">
+ 
+                <Table
+                    id="myTable"
+                    growing="true"
+                    growingThreshold="25"
+                    growingScrollToLoad="true"
+                    busyIndicatorDelay="0"
+                    items="{/Orders}">
+                    <headerToolbar>
+                        <Toolbar>
+                            <Title text="Orders of ALFKI"/>
+                            <ToolbarSpacer/>
+                            <Button text="Click here for filters" press="onDialogOpen"/>
+                        </Toolbar>
+                    </headerToolbar>
+                    <columns>
+                        <Column>
+                            <Text text="OrderID"/>
+                        </Column>
+                        <Column>
+                            <Text text="CustomerID"/>
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="{OrderID}"/>
+                                <Text text="{CustomerID}"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+ 
+            </mvc:View>
+        </script>
+ 
+        <!-- XML Fragment -->
+        <script id="myXMLFragment" type="ui5/fragment">
+            <core:FragmentDefinition
+              xmlns="sap.m"
+              xmlns:core="sap.ui.core">
+              <ViewSettingsDialog
+                  confirm="onTableSettingsConfirm">
+                  <sortItems>
+                      <ViewSettingsItem text="OrderID" key="OrderID" selected="true" />
+                  </sortItems>
+                  <filterItems>
+                      <ViewSettingsFilterItem
+                          text="CustomerID"
+                          key="CustomerID"
+                          multiSelect="true"
+                          items="{path: '/Customers', sorter: [{path: 'CustomerID', descending: false}]}">
+                          <items>
+                              <ViewSettingsItem text="{CustomerID}" key="{CustomerID}" />
+                          </items>
+                      </ViewSettingsFilterItem>
+                  </filterItems>
+              </ViewSettingsDialog>
+          </core:FragmentDefinition>
+        </script>
+ 
+        <script>
+            sap.ui.getCore().attachInit(function () {
+                "use strict";
+ 
+                //### Controller ###
+                sap.ui.define([
+                    "sap/ui/core/mvc/Controller",
+                    "sap/ui/model/odata/v2/ODataModel"
+                ], function (Controller, ODataModel) {
+                    "use strict";
+ 
+                    return Controller.extend("MyController", {
+                        
+                        _oTableSettingsDialog: null,
+                      
+                        onInit : function () {
+                            this.getView().setModel(
+                                new ODataModel("https://cors-anywhere.herokuapp.com/services.odata.org/V2/Northwind/Northwind.svc/")
+                            );
+                        },
+                      
+                        onDialogOpen: function(){
+                            if (!this._oTableSettingsDialog) {
+                                var afilters = []
+                                jQuery.each(this.getView().byId("myTable").getBinding("items").getModel().oData, function(i, object){
+                                  console.log(object.CustomerID)
+                                  afilters.push(new sap.ui.model.Filter("CustomerID", "Contains", object.CustomerID));
+                                })
+                                var oFilter = new sap.ui.model.Filter({
+                                  filters: afilters, 
+                                  and: false
+                                })
+                              
+                                this._oTableSettingsDialog = sap.ui.xmlfragment({
+                                    fragmentContent : jQuery("#myXMLFragment").html()
+                                });
+                                this._oTableSettingsDialog.setModel(this.getView().getModel());
+                                this._oTableSettingsDialog.getFilterItems()[0].getBinding("items").filter(oFilter)
+                                
+                            }
+                            this._oTableSettingsDialog.open();
+                        }
+                      
+                    });
+                });
+ 
+                //### THE APP: place the XMLView somewhere into DOM ###
+                sap.ui.xmlview({
+                    viewContent : jQuery("#myXmlView").html()
+                }).placeAt("content");
+ 
+            });
+        </script>
+ 
+    </head>
+ 
+    <body class="sapUiBody">
+        <div id="content"></div>
+    </body>
+</html>

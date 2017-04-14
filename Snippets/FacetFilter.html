@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta charset="utf-8">
+
+		<title>MVC with XmlView</title>
+
+		<!-- Load UI5, select "blue crystal" theme and the "sap.m" control library -->
+		<script id='sap-ui-bootstrap'
+				src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+			data-sap-ui-theme='sap_bluecrystal'
+			data-sap-ui-libs='sap.m'
+			data-sap-ui-xx-bindingSyntax='complex'></script>
+
+
+		<!-- DEFINE RE-USE COMPONENTS - NORMALLY DONE IN SEPARATE FILES -->
+
+		<!-- define a new (simple) View type as an XmlView
+		 - using data binding for the Button text
+		 - binding a controller method to the Button's "press" event
+		 - also mixing in some plain HTML
+		 note: typically this would be a standalone file -->
+
+		<script id="view1" type="sapui5/xmlview">
+		<mvc:View
+			controllerName="my.own.controller"
+			xmlns:l="sap.ui.layout"
+			xmlns:mvc="sap.ui.core.mvc"
+			xmlns="sap.m">
+			<VBox
+				id="idVBox">
+				<items>
+		
+					<FacetFilter
+						id="idFacetFilter"
+						type="Simple"
+						showPersonalization="true"
+						showReset="true"
+						reset="handleFacetFilterReset"
+						lists="{filters>/Filters}">
+						<lists>
+							<FacetFilterList
+								title="{filters>type}"
+								key="{filters>key}"
+								multiselect="true"
+								listClose="handleListClose"
+								items="{filters>values}">
+								<items>
+									<FacetFilterItem
+										text="{filters>text}"
+										key="{filters>key}"/>
+								</items>
+							</FacetFilterList>
+						</lists>
+					</FacetFilter>	
+					<!--  A demo table will be appended here  -->
+					<Table id="mytable" items="{/Orders}">
+						<columns>
+							<Column>
+								<Text text="Customer ID"/>
+							</Column>
+							<Column>
+								<Text text="Ship City"/>
+							</Column>							
+						</columns>
+						<items>
+							<ColumnListItem>
+								<cells>
+									<ObjectIdentifier title="{CustomerID}" text= "{ShipCity}"/>
+									<Text text="{ShipCity}"/>
+								</cells>
+							</ColumnListItem>
+						</items>
+					</Table>
+				</items>
+			</VBox>
+		</mvc:View>
+	</script>
+
+
+		<script>
+			// define a new (simple) Controller type
+			sap.ui.controller("my.own.controller", {
+
+				onInit: function() {
+		
+					// Append demo table into VBox, making a minor modification
+					// to the first column so that the Category information is shown
+					
+					
+					
+					//var oComp = sap.ui.getCore().createComponent({name : 'sap.m.Table'});
+					//oComp.setModel(this.getView().getModel());
+					var oTable = this.getView().byId("mytable");
+					var oBindingInfo = oTable.getBindingInfo("items");
+					oBindingInfo.template.removeCell(0);
+					oBindingInfo.template.insertCell(new sap.m.ObjectIdentifier({
+						title: "{CustomerID}",
+						text: "{ShipCity}"
+					}));
+					oTable.bindItems(oBindingInfo);
+					this.getView().byId("idVBox").addItem(oTable);
+				},
+		
+				_applyFilter: function(oFilter) {
+					// Get the table (last thing in the VBox) and apply the filter
+					var aVBoxItems = this.getView().byId("idVBox").getItems();
+					var oTable = aVBoxItems[aVBoxItems.length-1];
+					oTable.getBinding("items").filter(oFilter);
+				},
+		
+				handleFacetFilterReset: function(oEvent) {
+					var oFacetFilter = sap.ui.getCore().byId(oEvent.getParameter("id"));
+					var aFacetFilterLists = oFacetFilter.getLists();
+					for(var i=0; i < aFacetFilterLists.length; i++) {
+						for(var i=0; i < aFacetFilterLists.length; i++) {
+							aFacetFilterLists[i].setSelectedKeys();
+						}
+					}
+					this._applyFilter([]);
+				},
+		
+				handleListClose: function(oEvent) {
+					// Get the Facet Filter lists and construct a (nested) filter for the binding
+					var oFacetFilter = oEvent.getSource().getParent();
+					this._filterModel(oFacetFilter);
+				},
+		
+				handleConfirm: function (oEvent) {
+					// Get the Facet Filter lists and construct a (nested) filter for the binding
+					var oFacetFilter = oEvent.getSource();
+					this._filterModel(oFacetFilter);
+					sap.m.MessageToast.show("confirm event fired");
+				},
+		
+				_filterModel: function(oFacetFilter) {
+					var mFacetFilterLists = oFacetFilter.getLists().filter(function(oList) {
+						return oList.getSelectedItems().length;
+					});
+		
+					if(mFacetFilterLists.length) {
+						// Build the nested filter with ORs between the values of each group and
+						// ANDs between each group
+						var oFilter = new sap.ui.model.Filter(mFacetFilterLists.map(function(oList) {
+							return new sap.ui.model.Filter(oList.getSelectedItems().map(function(oItem) {
+								return new sap.ui.model.Filter(oList.getTitle(), "EQ", oItem.getText());
+							}), false);
+						}), true);
+						this._applyFilter(oFilter);
+					} else {
+						this._applyFilter([]);
+					}
+				}
+			});
+	
+	
+	
+			/*** THIS IS THE "APPLICATION" CODE ***/
+
+			// create some dummy JSON data
+		
+			var data ={
+				  "Filters": [{
+					"type": "CustomerID",
+					"values": [
+						{
+							"text": "VINET",
+						},
+						{
+							"text": "TOMSP",
+						},
+						{
+							"text": "HANAR",
+						},
+						{
+							"text": "VICTE",
+						},
+						{
+							"text": "SUPRD",
+						}
+					]
+				},
+				{
+					"type": "ShipCity",
+					"values": [
+						{
+							"text": "Lyon"
+						},
+						{
+							"text": "Charleroi"
+						},
+						{
+							"text": "Rio de Janeiro"
+						},
+						{
+							"text": "Münster"
+						}
+					]
+				}
+			  ]
+			};
+
+			// instantiate the View
+			var myView = sap.ui.xmlview({viewContent:jQuery('#view1').html()}); // accessing the HTML inside the script tag above
+
+			
+			// create a Model and assign it to the View
+			var oModel = new sap.ui.model.json.JSONModel();
+			oModel.setData(data);
+			myView.setModel(oModel, "filters");
+			
+			// create a Model and assign it to the View
+			var uri = "https://cors-anywhere.herokuapp.com/services.odata.org/V2/Northwind/Northwind.svc"; // local proxy for cross-domain access
+			var oModel2 = new sap.ui.model.odata.ODataModel(uri, {
+				maxDataServiceVersion: "2.0"
+			}); 
+			myView.setModel(oModel2);
+
+			// put the View onto the screen
+			myView.placeAt('content');
+
+		</script>
+	
+	</head>
+	<body id='content' class='sapUiBody'>
+	</body>
+</html>

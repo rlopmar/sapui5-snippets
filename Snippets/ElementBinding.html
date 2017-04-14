@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta charset="utf-8">
+
+		<title>MVC with XmlView</title>
+
+		<!-- Load UI5, select "sap_belize" theme and the "sap.m" control library -->
+		<script id='sap-ui-bootstrap'
+			src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+			data-sap-ui-theme='sap_belize'
+			data-sap-ui-libs='sap.m'
+			data-sap-ui-xx-bindingSyntax='complex'></script>
+
+
+		<!-- DEFINE RE-USE COMPONENTS - NORMALLY DONE IN SEPARATE FILES -->
+
+		<!-- define a new (simple) View type as an XmlView
+		 - using data binding for the Button text
+		 - binding a controller method to the Button's "press" event
+		 - also mixing in some plain HTML
+		 note: typically this would be a standalone file -->
+
+		<script id="view1" type="sapui5/xmlview">
+		<mvc:View xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" controllerName="my.own.controller">
+			<Panel>
+				<Select items="{/items}" change="onSelectionChange">
+					<core:Item key="{id}" text="{id}"/>
+				</Select>
+			</Panel>
+			<Panel id="resultsPanel" headerText="Selected item information">
+			</Panel>
+		</mvc:View> 
+		</script>
+
+
+		<script>
+			// define a new (simple) Controller type
+			sap.ui.controller("my.own.controller", {
+              
+                onInit: function(){
+                  var oTile = new sap.m.GenericTile({
+                    id: "resultTile",
+                    header:"{text}",
+                    tileContent:[
+                      new sap.m.TileContent({
+                        content:[
+                          new sap.m.NumericContent({
+                            value: "{number}"
+                          })
+                        ]
+                      })
+                    ]
+                  });
+                  this.getView().byId("resultsPanel").addContent(oTile);
+                },
+
+				// implement an event handler in the Controller
+				onSelectionChange: function(oEvent) {
+					//Get the context from the selected item
+					var oSelectedItem = oEvent.getParameter("selectedItem");
+					var oContext = oSelectedItem.getBindingContext();
+                    //Get the path in the model pointing to the selected item
+					var sPath = oContext.getPath();
+					
+					//Implement the Element Binding with the path retrieved from the selected item
+					var oProductDetailPanel = this.getView().byId("resultsPanel");
+					oProductDetailPanel.bindElement({ path: sPath });
+				}
+			});
+	
+	
+	
+			/*** THIS IS THE "APPLICATION" CODE ***/
+
+			// create some dummy JSON data
+			var data = {
+				items: [
+					{
+						id: "item1",
+						text: "you have clicked the FIRST item",
+						number: "1"
+					},
+					{
+						id: "item2",
+						text: "you have clicked the SECOND item",
+						number: "2"
+					},
+					{
+						id: "item3",
+						text: "you have clicked the THIRD item",
+						number: "3"
+					},
+					{
+						id: "item4",
+						text: "you have clicked the FOURTH item",
+						number: "4"
+					},
+				]
+			};
+
+			// instantiate the View
+			var myView = sap.ui.xmlview({viewContent:jQuery('#view1').html()}); // accessing the HTML inside the script tag above
+
+			// create a Model and assign it to the View
+			var oModel = new sap.ui.model.json.JSONModel();
+			oModel.setData(data);
+			myView.setModel(oModel);
+
+			// put the View onto the screen
+			myView.placeAt('content');
+
+		</script>
+	
+	</head>
+	<body id='content' class='sapUiBody'>
+	</body>
+</html>
