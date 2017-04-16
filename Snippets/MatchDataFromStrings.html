@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv='X-UA-Compatible' content='IE=edge' />
+	<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'/>
+	<title>test</title>
+
+	<script id='sap-ui-bootstrap' type='text/javascript'
+		src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+		data-sap-ui-theme='sap_bluecrystal'
+		data-sap-ui-libs='sap.ui.commons,sap.ui.ux3,sap.ui.table,sap.m'></script>
+		<!-- add 'sap.ui.table' and/or other libraries if required -->
+
+	<script>
+		
+		var table = new sap.m.Table({
+			columns: [
+				new sap.m.Column({header: new sap.m.Label({text: "Expression"})}),
+				new sap.m.Column({header: new sap.m.Label({text: "Expression Sentiment"})})
+			]
+			
+		});		
+
+		
+		table.bindAggregation("items", "/parameters", function (id, context){
+			var parameter = context.getObject();
+			var template = new sap.m.ColumnListItem(id);
+			template.addCell(new sap.m.Text({text: parameter.key}));
+			template.addCell(new sap.m.Text({text: parameter.value}));			
+			return template;
+		});
+		
+		var data = {
+			parameters: []
+		}
+		
+		table.setModel(new sap.ui.model.json.JSONModel(
+			data
+		));
+		
+		var addBtn = new sap.m.Button({
+			icon: 'sap-icon://add',
+			press: function() {
+				var expression = "escalate, bloody message 904220, message 722233/2015,support is seriously unprofessional, Please escalate bloody message 904220 and message 722233/2015";
+				var expressionSentiment = ",Strong negative,,Major problem,";
+				expression = expression.split(",")
+				expressionSentiment = expressionSentiment.split(",")
+				
+				for(var i=0; i<expression.length; i++){
+					var newRow = {key: expression[i], value: expressionSentiment[i]};
+					var model = table.getModel();
+					var data = model.getProperty("/parameters").push(newRow);
+					model.refresh(false);				
+					
+					var rows = table.getItems();
+					var row = rows[rows.length-1];
+					var cell = row.getCells()[0];
+					setTimeout(function(){
+						cell.focus();
+					});
+				}
+				
+				
+			}
+		});
+		
+		var toolbar = new sap.m.OverflowToolbar({
+                content: [
+                    new sap.m.Label({
+                        text: 'Press this button to push the data'
+                    }),
+					addBtn
+                ]
+            });
+		toolbar.placeAt('content');
+		table.placeAt('content');
+
+	</script>
+
+</head>
+<body class='sapUiBody'>
+	<div id='content'></div>
+</body>
+</html>
