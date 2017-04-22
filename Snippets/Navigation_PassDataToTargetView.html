@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv='X-UA-Compatible' content='IE=edge' >
+	<meta charset="UTF-8" >
+	<title>test</title>
+
+	<script id='sap-ui-bootstrap'
+			src='https://sapui5.hana.ondemand.com/1.38.5/resources/sap-ui-core.js'
+		data-sap-ui-theme='sap_bluecrystal'
+		data-sap-ui-bindingSyntax="complex"></script>
+
+	<script id="view1" type="sapui5/xmlview">
+		<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc">
+			<core:ComponentContainer name='my.comp'/>
+		</mvc:View>
+	</script>
+
+	<script id="home" type="sapui5/xmlview">
+		<mvc:View xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc"
+			controllerName="my.controller1">
+			<Page>
+				<Table id="myTable">
+                    <headerToolbar>
+                        <Toolbar>
+                            <Title text="Modify the column names and press + ==> " />
+                            <ToolbarSpacer/>
+                            <Button icon="sap-icon://add" press="onAddPress"/>
+                        </Toolbar>
+                    </headerToolbar>
+                    <columns>
+                        <Column>
+                            <Input palceholder="Column Name" value="Column1"/>
+                        </Column>
+                        <Column>
+                            <Input palceholder="Column Name" value="Column2"/>
+                        </Column>
+                        <Column>
+                            <Input palceholder="Column Name" value="Column3"/>
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="Text1" />
+                                <Text text="Text2" />
+                                <Text text="Text3" />
+                            </cells>
+                        </ColumnListItem>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="Text1" />
+                                <Text text="Text2" />
+                                <Text text="Text3" />
+                            </cells>
+                        </ColumnListItem>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="Text1" />
+                                <Text text="Text2" />
+                                <Text text="Text3" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+			</Page>
+		</mvc:View>
+	</script>
+
+	<script id="add" type="sapui5/xmlview">
+		<mvc:View xmlns="sap.m" xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc"
+			controllerName="my.controller2">
+			<Page id="page" showNavButton="true" navButtonPress="onBack">
+                <VBox items="{columnsModel>/columns}">
+                  <items>
+                    <HBox class="sapUiLargeMarginBegin">
+                      <Label text="{columnsModel>columnName}:" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+                      <Input placeholder="{columnsModel>columnName} value"/>
+                    </HBox>
+                  </items>
+                </VBox>
+			</Page>
+		</mvc:View>
+	</script>
+  
+	<script>
+		// jQuery.sap.declare("my.comp.Component");
+		sap.ui.define("my/comp/Component", ["sap/ui/core/UIComponent"], function(UIComponent) {
+			return UIComponent.extend("my.comp.Component", {
+				metadata : {
+					name : "GreatComponent",
+					version : "1.0",
+					includes : [],
+					dependencies : {
+						libs : ["sap.m"]
+					},
+					routing: {
+						config: {
+							routerClass: "sap.m.routing.Router",
+							viewType: "XML",
+							viewPath: "my",
+							controlId: "app",
+							transition: "slide",
+							controlAggregation: "pages"
+						},
+						routes: [
+							{
+								name: "home",
+								pattern: "",
+								target: "home"
+							},
+							{
+								name: "add",
+								pattern: "add",
+								target: "add"
+							}
+						],
+						targets: {
+							home: {
+								viewName: "Home",
+								title: "home"
+							},
+							add: {
+								viewName: "Add",
+								title: "add"
+							}
+						}
+					}
+				},
+				init: function() {
+					sap.ui.core.UIComponent.prototype.init.apply(this, arguments);
+					var oRouter = this.getRouter();
+					var oViews = oRouter.getViews();
+					this.runAsOwner(function() {
+						var myHome = sap.ui.xmlview({viewContent:jQuery('#home').html()});
+						oViews.setView("my.Home", myHome);
+						var myAdd = sap.ui.xmlview({viewContent:jQuery('#add').html()});
+						oViews.setView("my.Add", myAdd);
+					});
+					oRouter.initialize();
+				},
+				createContent : function() {
+					var componentData = this.getComponentData();
+					return new sap.m.App("app", {
+					});
+				}
+			});
+		});
+      
+		sap.ui.define("my/controller1", [
+          "sap/ui/core/UIComponent"
+        ],function(UIComponent) {
+			return sap.ui.controller("my.controller1", {
+				onInit: function() {
+					this.oRouter = UIComponent.getRouterFor(this.getView());
+
+                    var oModel = new sap.ui.model.json.JSONModel();
+                    var oData = {
+                       columns: []
+                    }
+                    oModel.setData(oData);
+                    sap.ui.getCore().setModel(oModel, "columnsModel");
+				},
+              
+				onAddPress: function() {
+                    var aColumnsNames = [];
+                    var aColumns = this.getView().byId("myTable").getColumns();
+                    for (var i=0; i<aColumns.length; i++){
+                        var sColumnName = aColumns[i].getHeader().getValue();
+                        var oItem = {columnName: sColumnName};
+                        aColumnsNames.push(oItem);
+                    }
+                    sap.ui.getCore().getModel("columnsModel").setProperty("/columns", aColumnsNames);
+                  
+                  
+					this.oRouter.navTo("add");
+                }
+			});
+		});
+      
+		sap.ui.define("my/controller2", [
+          "sap/ui/core/UIComponent"
+        ],function(UIComponent) {
+			return sap.ui.controller("my.controller2", {
+				onInit: function() {
+					this.oRouter = UIComponent.getRouterFor(this.getView());
+                  
+                    var oModel = sap.ui.getCore().getModel("columnsModel");
+                    this.getView().byId("page").setModel(oModel, "columnsModel");
+				},
+                onBack: function(){
+                    this.oRouter.navTo("home");
+                }
+			});
+		});
+		sap.ui.require(["my/comp/Component"], function(myComp) {
+			// instantiate the View
+			sap.ui.xmlview({viewContent:jQuery('#view1').html()}).placeAt('content');
+		});
+	</script>
+
+</head>
+<body class='sapUiBody'>
+	<div id='content'></div>
+</body>
+</html>
