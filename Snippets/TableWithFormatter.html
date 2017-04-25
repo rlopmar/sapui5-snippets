@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta charset="utf-8">
+		
+		<title>Just a Button</title>
+		
+		<script src="https://sapui5.hana.ondemand.com/resources/sap-ui-core.js" 
+			id="sap-ui-bootstrap"
+			data-sap-ui-libs="sap.m, sap.ui.table" 
+			data-sap-ui-theme="sap_belize"></script>
+			<!-- only load the main library "sap.m" and the Belize theme -->
+		
+		<script>
+			var aData = [
+				{lastName: "Dente", name: "Al", checked: true },
+				{lastName: "Friese", name: "Andy", checked: true},
+				{lastName: "Mann", name: "Anita", checked: false},
+				{lastName: "Schutt", name: "Doris", checked: true},
+				{lastName: "Open", name: "Doris", checked: true},
+				{lastName: "Dewit", name: "Kenya", checked: false},
+				{lastName: "Zar", name: "Lou", checked: true},
+				{lastName: "Burr", name: "Tim", checked: true},
+				{lastName: "Hughes", name: "Tish", checked: true},
+				{lastName: "Town", name: "Mo", checked: true},
+				{lastName: "Case", name: "Justin", checked: false},
+				{lastName: "Time", name: "Justin", checked: true},
+				{lastName: "Barr", name: "Sandy", checked: true},
+				{lastName: "Poole", name: "Gene", checked: true},
+				{lastName: "Ander", name: "Corey", checked: false},
+				{lastName: "Early", name: "Brighton", checked: true},
+				{lastName: "Noring", name: "Constance", checked: true},
+				{lastName: "O'Lantern", name: "Jack", checked: true},
+				{lastName: "Tress", name: "Matt", checked: true},
+				{lastName: "Turner", name: "Paige", checked: true}
+			];
+		
+			var oTable = new sap.ui.table.Table("table");
+		
+			oTable.setSelectionMode(sap.ui.table.SelectionMode.MultiToggle);
+			
+			//FIRST COLUMN
+			//Adding the formatter function in the Text field of the first column
+			var oControl = new sap.m.Text({
+										text:{
+										   path: "lastName",
+										   formatter: function(value){
+											  if (!value) return;
+											  return value.toUpperCase()+" (formatted Value) ";
+											}
+										}
+			});
+			var oColumn = new sap.ui.table.Column({multiLabels: [
+					new sap.m.Label({text: "Last Name"}),
+					new sap.m.Label({text: "Second level header"})
+				], template: oControl, sortProperty: "lastName", filterProperty: "lastName", headerSpan: [2,1], autoResizable: true});
+			oTable.addColumn(oColumn, {autoResizable: true});
+			
+			
+			//SECOND COLUMN
+			oControl = new sap.m.Text({text:"{name}"});
+			oTable.addColumn(new sap.ui.table.Column({ multiLabels: [
+					new sap.m.Label({text: "First Name"}),
+					new sap.m.Label({text: "Name of the person"})
+				   ],template: oControl, sortProperty: "name", filterProperty: "name", autoResizable: true}));
+			
+			
+			//THIRD COLUMN
+			oControl = new sap.m.CheckBox({selected:"{checked}"});
+			oTable.addColumn(new sap.ui.table.Column({label: new sap.m.Label({text: "Checked (very long label text to show wrapping behavior)" /*, wrapping: true */}), template: oControl, sortProperty: "checked", filterProperty: "checked", hAlign: "Center", autoResizable: true}));
+		
+			var oModel = new sap.ui.model.json.JSONModel();
+			oModel.setData({modelData: aData});
+			oTable.setModel(oModel);
+			oTable.bindRows("/modelData");
+		
+			oTable.placeAt("content");
+		</script>
+		
+	</head>
+	<body id="content" class="sapUiBody">
+	</body>
+</html>

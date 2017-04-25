@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv='X-UA-Compatible' content='IE=edge' />
+	<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>test</title>
+
+	<script id='sap-ui-bootstrap' type='text/javascript'
+			src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+		data-sap-ui-theme='sap_bluecrystal'
+		data-sap-ui-libs='sap.m, sap.uxap'
+		data-sap-ui-xx-bindingSyntax="complex">
+	</script>
+
+	<script id="view1" type="sapui5/xmlview">
+<mvc:View
+	height="100%"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:table="sap.ui.table"
+	xmlns:l="sap.ui.commons.layout"
+	controllerName="sap.sample.PageController">
+	<!-- Use xmlns:l="sap.ui.layout" instead of xmlns:l="sap.ui.commons.layout" -->
+	
+	<Page
+		title="Table"
+		class="sapUiContentPadding"
+		showNavButton="true" >
+		<content>
+			<VBox>
+				<table:Table visibleRowCountMode="Interactive" rows="{/rows}">
+					<table:columns>
+						<table:Column>
+							<Label text="column1"/>
+							<table:template>
+								<Label text="contentLabel1"/>
+							</table:template>
+						</table:Column>
+						<table:Column>
+							<Label text="column2"/>
+							<table:template>
+								<Label text="contentLabel2"/>
+							</table:template>
+						</table:Column>
+						<table:Column>
+							<Label text="column3"/>
+							<table:template>
+								<l:HorizontalLayout allowWrapping="true">
+									<Text text="TextInHorizLayout"/>
+								</l:HorizontalLayout>
+							</table:template>
+						</table:Column>
+						<table:Column>
+							<Label text="column4"/>
+							<table:template>
+								<Label text="contentLabel3"/>
+							</table:template>
+						</table:Column>
+					</table:columns>
+				</table:Table>
+			</VBox>
+		</content>
+		<footer>
+			<Toolbar>
+				<ToolbarSpacer/>
+				<Button text="Accept" type="Accept" />
+				<Button text="Reject" type="Reject" />
+				<Button text="Edit" />
+				<Button text="Delete" />
+			</Toolbar>
+		</footer>
+	</Page>
+</mvc:View>
+	</script>
+	
+	<script>
+		var model = new sap.ui.model.json.JSONModel({
+				rows: [
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1},
+					{a: 1}
+					
+				]
+		});
+		
+
+		sap.ui.controller("sap.sample.PageController", {
+		});
+							
+		var view = sap.ui.xmlview({viewContent:jQuery('#view1').html()}); // accessing the HTML inside the script tag above
+			view.setModel(model);
+
+		var app = new sap.m.App();
+		app.addPage(view);
+
+		app.placeAt('content');
+	</script>
+
+</head>
+<body class='sapUiBody'>
+	<div id='content'></div>
+</body>
+</html>
