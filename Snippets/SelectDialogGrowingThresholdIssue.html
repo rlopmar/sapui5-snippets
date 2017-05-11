@@ -1,0 +1,92 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'/>
+		
+		<title>sap.m.SelectDialog with OR-Filter</title>
+		
+		<script src="https://sapui5.hana.ondemand.com/resources/sap-ui-core.js" 
+			id="sap-ui-bootstrap"
+			data-sap-ui-libs="sap.m" 
+			data-sap-ui-theme="sap_bluecrystal"></script>
+			<!-- only load the mobile lib "sap.m" and the "sap_bluecrystal" theme -->
+		
+		
+		<script type="text/javascript">
+			
+		var oJSON = { ScreenVariantSet: [
+			{ Id: "1",       ShortText: "Test1",      }, 
+			{ Id: "2",       ShortText: "Test2",      },
+			{ Id: "3",       ShortText: "Test3", },
+			{ Id: "4",       ShortText: "Test4",      }, 
+			{ Id: "5",       ShortText: "Test5",      },
+			{ Id: "6",       ShortText: "Test6", },
+			{ Id: "7",       ShortText: "Test7",      }, 
+			{ Id: "8",       ShortText: "Test8",      },
+			{ Id: "9",       ShortText: "Test9", },
+			{ Id: "10",       ShortText: "Test10",     }, 
+			{ Id: "11",       ShortText: "Test11",     },
+			{ Id: "12",       ShortText: "Test12",},
+			{ Id: "13",       ShortText: "Test13",     }, 
+			{ Id: "14",       ShortText: "Test14",     },
+			{ Id: "15",       ShortText: "Test15",},
+			{ Id: "16",       ShortText: "Test16",     }, 
+			{ Id: "17",       ShortText: "Test17",     },
+			{ Id: "18",       ShortText: "Test18",},
+			{ Id: "19",       ShortText: "Test19",     }, 
+			{ Id: "20",       ShortText: "Test20",     },
+			{ Id: "21",       ShortText: "Test21",},
+			{ Id: "22",       ShortText: "Test22",     }, 
+			{ Id: "23",       ShortText: "Test23",     },
+			{ Id: "23",       ShortText: "Test24",},
+			{ Id: "25",       ShortText: "Test25",     }]
+		};
+			
+		var oJSONModel = new sap.ui.model.json.JSONModel();
+		oJSONModel.setDefaultBindingMode("OneWay");
+		oJSONModel.setData(oJSON);
+			
+	    var oSelectDialog = new sap.m.SelectDialog("sd",{
+			items: {
+				path: "JSON>/ScreenVariantSet",
+				template: new sap.m.StandardListItem({
+					title: "{JSON>ShortText}",
+					description: "{JSON>Id}"})
+			},
+			title: 'Select a Variant',
+			noDataText: 'Nothing found',
+			growing: true,
+			growingThreshold: 7,
+			search: function(oEvent) {
+				var sValue = oEvent.getParameter("value");
+				var aFilters = [];
+				aFilters.push(new sap.ui.model.Filter("ShortText", sap.ui.model.FilterOperator.Contains, sValue));
+				aFilters.push(new sap.ui.model.Filter("Id", sap.ui.model.FilterOperator.Contains, sValue));
+				var oBinding = oEvent.getSource().getBinding("items");
+				oBinding.filter(new sap.ui.model.Filter(aFilters, false)); // false = OR
+			},
+			confirm: function(oEvent){alert(oEvent.getParameter('selectedItem').getTitle());}
+		});
+			
+		oSelectDialog.setModel(oJSONModel, "JSON");
+		var fnOpen = function() { 
+				oSelectDialog.open(); 
+		};
+			
+		var oButton = new sap.m.Button({text: "Open Select Dialog", press: fnOpen});
+
+			
+		var page = new sap.m.Page({ title: "sap.m.SelectDialog", content: oButton });
+			
+		var app = new sap.m.App({ pages: [page]	}).placeAt("content");
+			
+		</script>
+		
+	</head>
+	<body id="content" class="sapUiBody">
+	</body>
+</html>
+<!-- user:Reeth --><!-- description:problem with sap.m.SelectDialog -->
+<!-- user:Udi Nir --><!-- description:sap.m.SelectDialog -->
+<!-- user:Rafael Lopez --><!-- description:sap.m.SelectDialog Issues with growingThreshold -->

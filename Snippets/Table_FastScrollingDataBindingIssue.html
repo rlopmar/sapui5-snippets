@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta charset="utf-8">
+
+		<title>MVC with XmlView</title>
+
+		<!-- Load UI5, select "blue crystal" theme and the "sap.m" control library -->
+		<script id='sap-ui-bootstrap'
+			src='https://sapui5.hana.ondemand.com/1.36.12/resources/sap-ui-core.js'
+			data-sap-ui-theme='sap_bluecrystal'
+			data-sap-ui-libs='sap.m'
+			data-sap-ui-xx-bindingSyntax='complex'></script>
+
+
+		<!-- DEFINE RE-USE COMPONENTS - NORMALLY DONE IN SEPARATE FILES -->
+
+		<!-- define a new (simple) View type as an XmlView
+		 - using data binding for the Button text
+		 - binding a controller method to the Button's "press" event
+		 - also mixing in some plain HTML
+		 note: typically this would be a standalone file -->
+
+		<script id="view1" type="sapui5/xmlview">
+		<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" controllerName="my.own.controller" xmlns:table="sap.ui.table" >
+			<App>
+				<pages>
+					<Page title="My Page title" showNavButton="false" class="sapUiSizeCompact" haight="100%">
+						<content>
+							<sap.ui.layout:Grid xmlns:sap.ui.layout="sap.ui.layout" defaultSpan="L12 M12 S12" width="auto" id="__grid1" height="100%">
+								<sap.ui.layout:content>
+								<table:Table id="__table0" enableSelectAll="true" title="Table Title" selectionMode="MultiToggle" enableColumnFreeze="true" visibleRowCount="24" rows="{/Orders}" visibleRowCountMode="Fixed">
+									<table:columns>
+										<table:Column id="__column0" width="100px">
+											<Label text="OrderID"/>
+											<table:template>
+												<Text text="{OrderID}"/>
+											</table:template>
+										</table:Column>
+										<table:Column id="__column1" width="180px">
+											<Label text="CustomerID" />
+											<table:template>
+												<Text text="{CustomerID}" />
+											</table:template>
+										</table:Column>
+										<table:Column id="__column2" width="150px">
+											<Label text="EmployeeID" />
+											<table:template>
+												<Text text="{EmployeeID}" />
+											</table:template>
+										</table:Column>
+										<table:Column id="__column3" width="150px">
+											<Label text="ShipRegion" />
+											<table:template>
+												<Text text="{ShipRegion}" />
+											</table:template>
+										</table:Column>
+										<table:Column id="__column4" width="150px" >
+											<Label text="ShipName" />
+											<table:template>
+												<Text text="{ShipName}"/>
+											</table:template>
+										</table:Column>
+										<table:Column id="__column5" width="100px" >
+											<Label text="ShipName" />
+											<table:template>
+												<Text text="{ShipName}"/>
+											</table:template>
+										</table:Column>
+										<table:Column id="__column6" width="150px" >
+											<Label text="ShipName" />
+											<table:template>
+												<Text text="{ShipName}"/>
+											</table:template>
+										</table:Column>
+										<table:Column id="__column7" width="150px" >
+											<Label text="ShipName" />
+											<table:template>
+												<Text text="{ShipName}"/>
+											</table:template>
+										</table:Column>
+										<table:Column id="__column8" width="150px" >
+											<Label text="ShipName" />
+											<table:template>
+												<Text text="{ShipName}"/>
+											</table:template>
+										</table:Column>
+										<table:Column id="__column9" width="150px" >
+											<Label text="ShipName" />
+											<table:template>
+												<Text text="{ShipName}"/>
+											</table:template>
+										</table:Column>
+									</table:columns>
+								</table:Table>
+								</sap.ui.layout:content>
+							</sap.ui.layout:Grid>
+						</content>
+					</Page>
+				</pages>
+			</App>
+		</mvc:View> 
+        </script>
+
+
+		<script>
+			// define a new (simple) Controller type
+			sap.ui.controller("my.own.controller", {
+
+				// implement an event handler in the Controller
+				doSomething: function() {
+					this.getView().getModel().read("/Orders", {
+						urlParameters: "$format=xlsx"
+					});
+				}
+			});
+	
+	
+	
+			/*** THIS IS THE "APPLICATION" CODE ***/
+
+			// create some dummy JSON data
+			var data = {
+				actionName: "Say Hello"
+			};
+
+			// instantiate the View
+			var myView = sap.ui.xmlview({viewContent:jQuery('#view1').html()}); // accessing the HTML inside the script tag above
+
+			// create a Model and assign it to the View
+			var uri = "https://cors-anywhere.herokuapp.com/services.odata.org/Northwind/Northwind.svc"; // local proxy for cross-domain access
+			var oModel = new sap.ui.model.odata.ODataModel(uri, {
+				maxDataServiceVersion: "2.0"
+			}); 
+			myView.setModel(oModel);
+
+			// put the View onto the screen
+			myView.placeAt('content');
+
+		</script>
+	
+	</head>
+	<body id='content' class='sapUiBody'>
+	</body>
+</html>
